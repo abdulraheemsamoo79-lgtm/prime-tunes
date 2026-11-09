@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -95,6 +96,7 @@ fun SongRow(
     isCurrent: Boolean,
     onClick: () -> Unit,
     onAddToPlaylist: ((Song) -> Unit)? = null,
+    onDownload: ((Song) -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -126,6 +128,15 @@ fun SongRow(
         if (song.durationLabel.isNotEmpty()) {
             Spacer(Modifier.width(8.dp))
             Text(song.durationLabel, color = SpotifyGreyText, fontSize = 13.sp)
+        }
+        if (onDownload != null) {
+            IconButton(onClick = { onDownload(song) }) {
+                Icon(
+                    Icons.Filled.Download,
+                    contentDescription = "Download",
+                    tint = SpotifyGreyText
+                )
+            }
         }
         if (onAddToPlaylist != null) {
             IconButton(onClick = { onAddToPlaylist(song) }) {

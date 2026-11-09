@@ -128,6 +128,12 @@ class PlayerController(context: Context) {
         publish()
     }
 
+    /** Playback speed (0.75x–2x), set from the player screen. */
+    fun setPlaybackSpeed(speed: Float) {
+        player.setPlaybackSpeed(speed)
+        publish()
+    }
+
     fun nextSong(): Song? {
         if (queueIndex + 1 >= queue.size) return null
         queueIndex++

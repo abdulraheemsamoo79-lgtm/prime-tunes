@@ -41,6 +41,31 @@ class LibraryStore(context: Context) {
         writeList(KEY_DOWNLOADS, current)
     }
 
+    // --- Recent search queries (Search screen) ---------------------------
+
+    /** Last submitted search queries, newest first (max 10). */
+    fun recentSearches(): List<String> {
+        val raw = prefs.getString(KEY_RECENT_SEARCHES, null) ?: return emptyList()
+        return runCatching {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i -> arr.getString(i) }.filter { it.isNotBlank() }
+        }.getOrDefault(emptyList())
+    }
+
+    fun addRecentSearch(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) return
+        val current = recentSearches().filterNot { it.equals(trimmed, ignoreCase = true) }
+        val updated = (listOf(trimmed) + current).take(10)
+        val arr = JSONArray()
+        updated.forEach { arr.put(it) }
+        prefs.edit().putString(KEY_RECENT_SEARCHES, arr.toString()).apply()
+    }
+
+    fun clearRecentSearches() {
+        prefs.edit().remove(KEY_RECENT_SEARCHES).apply()
+    }
+
     fun recentlyPlayed(): List<Song> = readList(KEY_RECENT)
 
     fun addRecentlyPlayed(song: Song) {
@@ -153,6 +178,7 @@ class LibraryStore(context: Context) {
         const val KEY_FAVORITES = "favorites"
         const val KEY_DOWNLOADS = "downloads"
         const val KEY_RECENT = "recent"
+        const val KEY_RECENT_SEARCHES = "recent_searches"
         const val KEY_PLAYLISTS = "playlists"
     }
 }

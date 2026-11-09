@@ -98,6 +98,8 @@ private fun PrimeTunesApp(viewModel: AppViewModel = viewModel()) {
             lyricsText = ui.lyricsText,
             lyricsLoading = ui.lyricsLoading,
             sleepTimerLabel = ui.sleepTimerLabel,
+            playbackSpeed = ui.playbackSpeed,
+            onCycleSpeed = viewModel::cyclePlaybackSpeed,
             onClose = viewModel::closePlayer,
             onToggle = viewModel::togglePlayPause,
             onNext = viewModel::playNext,
@@ -167,6 +169,7 @@ private fun PrimeTunesApp(viewModel: AppViewModel = viewModel()) {
                     },
                     onDeletePlaylist = { viewModel.deletePlaylist(it.id) },
                     onAddToPlaylist = viewModel::requestAddToPlaylist,
+                    onDownload = viewModel::download,
                 )
 
                 ui.tab == Tab.HOME -> HomeScreen(
@@ -189,6 +192,11 @@ private fun PrimeTunesApp(viewModel: AppViewModel = viewModel()) {
                     loading = ui.searchLoading,
                     error = ui.searchError,
                     currentSong = playback.currentSong,
+                    textSuggestions = ui.textSuggestions,
+                    songSuggestions = ui.songSuggestions,
+                    suggestionsOpen = ui.suggestionsOpen,
+                    searchFilter = ui.searchFilter,
+                    recentSearches = ui.recentSearches,
                     onQueryChange = viewModel::onSearchQueryChange,
                     onSubmit = viewModel::submitSearch,
                     onSongClick = { song, queue ->
@@ -196,6 +204,11 @@ private fun PrimeTunesApp(viewModel: AppViewModel = viewModel()) {
                         viewModel.openPlayer()
                     },
                     onAddToPlaylist = viewModel::requestAddToPlaylist,
+                    onDownload = viewModel::download,
+                    onTextSuggestionClick = viewModel::onTextSuggestionClick,
+                    onFilterChange = viewModel::setSearchFilter,
+                    onRecentSearchClick = viewModel::onRecentSearchClick,
+                    onClearRecentSearches = viewModel::clearRecentSearches,
                 )
 
                 ui.tab == Tab.LIBRARY -> LibraryScreen(
@@ -210,6 +223,7 @@ private fun PrimeTunesApp(viewModel: AppViewModel = viewModel()) {
                     onPlaylistClick = { viewModel.openPlaylist(it.id) },
                     onCreatePlaylist = viewModel::createPlaylist,
                     onAddToPlaylist = viewModel::requestAddToPlaylist,
+                    onDownload = viewModel::download,
                 )
             }
         }

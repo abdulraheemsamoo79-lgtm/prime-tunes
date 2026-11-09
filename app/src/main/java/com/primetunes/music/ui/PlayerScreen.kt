@@ -1,5 +1,7 @@
 package com.primetunes.music.ui
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +24,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.QueueMusic
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -62,6 +67,8 @@ fun PlayerScreen(
     lyricsText: String?,
     lyricsLoading: Boolean,
     sleepTimerLabel: String?,
+    playbackSpeed: Float,
+    onCycleSpeed: () -> Unit,
     onClose: () -> Unit,
     onToggle: () -> Unit,
     onNext: () -> Unit,
@@ -217,6 +224,26 @@ fun PlayerScreen(
             )
         }
 
+        Spacer(Modifier.height(8.dp))
+        val context = LocalContext.current
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            PlayerAction(
+                icon = Icons.Filled.Share,
+                label = "Share",
+                tint = Color.White,
+                onClick = { shareSong(context, song) }
+            )
+            PlayerAction(
+                icon = Icons.Filled.Speed,
+                label = formatSpeed(playbackSpeed),
+                tint = if (playbackSpeed != 1.0f) SpotifyGreen else Color.White,
+                onClick = onCycleSpeed
+            )
+        }
+
         if (sleepTimerLabel != null) {
             Spacer(Modifier.height(10.dp))
             Row(
@@ -326,6 +353,28 @@ private fun SleepTimerDialog(
         }
     )
 }
+
+/**
+ * Share "<title> — <artist>" via the system chooser. Fully guarded:
+ * a missing share target or any intent failure simply does nothing —
+ * sharing must never crash the player.
+ */
+private fun shareSong(context: Context, song: Song) {
+    runCatching {
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, "${song.title} — ${song.artist}\nvia PRIME TUNES")
+        }
+        val chooser = Intent.createChooser(send, "Share song").apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
+    }
+}
+
+/** 1.0f → "1x", 1.25f → "1.25x" (the speed button's label). */
+private fun formatSpeed(speed: Float): String =
+    if (speed == speed.toLong().toFloat()) "${speed.toLong()}x" else "${speed}x"
 
 private fun formatMs(ms: Long): String {
     if (ms <= 0) return "0:00"

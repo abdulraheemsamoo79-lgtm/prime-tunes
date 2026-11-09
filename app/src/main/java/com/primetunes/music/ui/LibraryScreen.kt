@@ -50,6 +50,7 @@ fun LibraryScreen(
     onPlaylistClick: (Playlist) -> Unit,
     onCreatePlaylist: (String) -> Unit,
     onAddToPlaylist: (Song) -> Unit,
+    onDownload: (Song) -> Unit,
 ) {
     var showCreateDialog by remember { mutableStateOf(false) }
 
@@ -117,7 +118,8 @@ fun LibraryScreen(
             items(favorites) { song ->
                 SongRow(song, song.id == currentSong?.id,
                     onClick = { onSongClick(song, favorites) },
-                    onAddToPlaylist = onAddToPlaylist)
+                    onAddToPlaylist = onAddToPlaylist,
+                    onDownload = onDownload)
             }
         }
 
@@ -131,11 +133,24 @@ fun LibraryScreen(
             items(downloads) { song ->
                 SongRow(song, song.id == currentSong?.id,
                     onClick = { onSongClick(song, downloads) },
-                    onAddToPlaylist = onAddToPlaylist)
+                    onAddToPlaylist = onAddToPlaylist,
+                    onDownload = onDownload)
             }
         }
 
-        item { Spacer(Modifier.height(16.dp)) }
+        item {
+            Spacer(Modifier.height(20.dp))
+            Text(
+                "PRIME TUNES v0.2",
+                color = SpotifyGreyText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
     }
 }
 
@@ -186,6 +201,7 @@ fun PlaylistDetailScreen(
     onSongClick: (Song, List<Song>) -> Unit,
     onDeletePlaylist: (Playlist) -> Unit,
     onAddToPlaylist: (Song) -> Unit,
+    onDownload: (Song) -> Unit,
 ) {
     var confirmDelete by remember { mutableStateOf(false) }
 
@@ -265,7 +281,8 @@ fun PlaylistDetailScreen(
             items(playlist.songs) { song ->
                 SongRow(song, song.id == currentSong?.id,
                     onClick = { onSongClick(song, playlist.songs) },
-                    onAddToPlaylist = onAddToPlaylist)
+                    onAddToPlaylist = onAddToPlaylist,
+                    onDownload = onDownload)
             }
         }
 

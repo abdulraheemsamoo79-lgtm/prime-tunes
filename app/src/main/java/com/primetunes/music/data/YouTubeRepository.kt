@@ -47,6 +47,28 @@ class YouTubeRepository : SongRepository {
             .map { it.toSong() }
     }
 
+    /**
+     * Text search suggestions for the Search screen, via
+     * NewPipeExtractor's suggestion extractor. API verified against the
+     * v0.27.0 javadoc: `StreamingService.getSuggestionExtractor()` takes
+     * no arguments and returns a `SuggestionExtractor`, whose
+     * `suggestionList(query)` returns the suggestion strings. Any
+     * failure returns an empty list — suggestions are a nicety, never a
+     * reason to disturb the screen.
+     */
+    suspend fun textSuggestions(query: String): List<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            ensureInit()
+            val extractor = ServiceList.YouTube.getSuggestionExtractor()
+                ?: return@withContext emptyList()
+            extractor.suggestionList(query)
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+                .take(8)
+        }.getOrDefault(emptyList())
+    }
+
     override suspend fun homeSections(): List<HomeSection> = coroutineScope {
         // Real searches, no fake catalogue. Order mirrors the agreed Home layout.
         val defs = listOf(

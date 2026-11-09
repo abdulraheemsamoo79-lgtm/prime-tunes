@@ -31,15 +31,25 @@ class SaavnRepository : SongRepository {
         .readTimeout(20, TimeUnit.SECONDS)
         .build()
 
-    override suspend fun search(query: String): List<Song> = withContext(Dispatchers.IO) {
-        runCatching {
-            val encoded = URLEncoder.encode(query, "UTF-8")
-            val json = getJson("$BASE_URL/api/search/songs?query=$encoded&limit=20")
-            val results = json.getJSONObject("data").getJSONArray("results")
-            List(results.length()) { i -> results.getJSONObject(i).toSong() }
-                .filter { it.directStreamUrl != null }
-        }.getOrDefault(emptyList())
-    }
+    override suspend fun search(query: String): List<Song> = searchWithLimit(query, limit = 20)
+
+    /**
+     * Mini-search used by the Search screen's live suggestions: same
+     * endpoint and shape as [search], just fewer results (the API
+     * honours `limit`). Failures return an empty list, never throw.
+     */
+    suspend fun searchSuggestions(query: String): List<Song> = searchWithLimit(query, limit = 10)
+
+    private suspend fun searchWithLimit(query: String, limit: Int): List<Song> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val encoded = URLEncoder.encode(query, "UTF-8")
+                val json = getJson("$BASE_URL/api/search/songs?query=$encoded&limit=$limit")
+                val results = json.getJSONObject("data").getJSONArray("results")
+                List(results.length()) { i -> results.getJSONObject(i).toSong() }
+                    .filter { it.directStreamUrl != null }
+            }.getOrDefault(emptyList())
+        }
 
     override suspend fun homeSections(): List<HomeSection> = emptyList()
 
